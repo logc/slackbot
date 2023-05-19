@@ -9,13 +9,20 @@ class SlackBot(cmd.Cmd):
     def __init__(self):
         model_name = "deepset/roberta-base-squad2"
         self.nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
+        self.redacted = []
         super().__init__()
 
     def do_check(self, arg):
         res = self.__answer(arg)
         prefix = arg[:res['start']]
         postfix = arg[res['end']:]
+        # NOTE: the actual redacted content is available as res['answer']
+        self.redacted.append(res['answer'])
         print(prefix + '[redacted]' + postfix)
+
+    def do_list(self, arg):
+        if arg == 'redacted':
+            print(self.redacted)
 
     def do_quit(self, arg):
         "Stop processing commands and exit: QUIT"
