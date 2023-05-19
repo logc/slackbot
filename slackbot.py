@@ -1,17 +1,27 @@
+import cmd
+
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 
-model_name = "deepset/roberta-base-squad2"
+class SlackBot(cmd.Cmd):
+    intro = 'Welcome to the Slackbot. Type help or ? to list commands.'
 
-# a) Get predictions
-nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
-QA_input = {
-    'question': 'Why is model conversion important?',
-    'context': 'The option to convert models between FARM and transformers gives freedom to the user and lets people easily switch between frameworks.'
-}
-res = nlp(QA_input)
+    def do_quit(self, arg):
+        "Stop processing commands and exit: QUIT"
+        print("Thank you for using the Slackbot")
+        # NOTE: free any resources here
+        return True
 
-# b) Load model & tokenizer
-model = AutoModelForQuestionAnswering.from_pretrained(model_name)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+    def __answer(self):
+        model_name = "deepset/roberta-base-squad2"
 
-print(res['answer'])
+        nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
+        QA_input = {
+            'question': 'Why is model conversion important?',
+            'context': 'The option to convert models between FARM and transformers gives freedom to the user and lets people easily switch between frameworks.'
+        }
+        res = nlp(QA_input)
+
+        return res['answer']
+
+if __name__ == "__main__":
+    SlackBot().cmdloop()
