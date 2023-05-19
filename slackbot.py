@@ -4,6 +4,18 @@ from transformers import AutoModelForQuestionAnswering, AutoTokenizer, pipeline
 
 class SlackBot(cmd.Cmd):
     intro = 'Welcome to the Slackbot. Type help or ? to list commands.'
+    prompt = '>> '
+
+    def __init__(self):
+        model_name = "deepset/roberta-base-squad2"
+        self.nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
+        super().__init__()
+
+    def do_check(self, arg):
+        res = self.__answer(arg)
+        prefix = arg[:res['start']]
+        postfix = arg[res['end']:]
+        print(prefix + '[redacted]' + postfix)
 
     def do_quit(self, arg):
         "Stop processing commands and exit: QUIT"
@@ -11,17 +23,12 @@ class SlackBot(cmd.Cmd):
         # NOTE: free any resources here
         return True
 
-    def __answer(self):
-        model_name = "deepset/roberta-base-squad2"
-
-        nlp = pipeline('question-answering', model=model_name, tokenizer=model_name)
+    def __answer(self, prompt):
         QA_input = {
-            'question': 'Why is model conversion important?',
-            'context': 'The option to convert models between FARM and transformers gives freedom to the user and lets people easily switch between frameworks.'
+            'question': 'What is my password?',
+            'context': prompt
         }
-        res = nlp(QA_input)
-
-        return res['answer']
+        return self.nlp(QA_input)
 
 if __name__ == "__main__":
     SlackBot().cmdloop()
